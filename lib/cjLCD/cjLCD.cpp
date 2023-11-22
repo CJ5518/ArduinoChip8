@@ -44,19 +44,20 @@ void LCD::sendByte(byte rs, byte rw, byte thing) {
 
 //Interface to commonly used functions
 void LCD::setDisplay(bool display, bool cursor, bool blink) {
-    sendByte(0,0,0b1000 | (display << 2) | (cursor << 1) | blink);
+	sendByte(0,0,0b1000 | (display << 2) | (cursor << 1) | blink);
+}
+void LCD::functionSet(bool extended, bool graphics) {
+	sendByte(0, 0, 0b100000 | (extended << 2) | (graphics << 1));
 }
 
 //Initialization
 void LCD::init(int CSbit, int SCLKbit, int SIDbit) {
-    CS = CSbit;
-    SCLK = SCLKbit;
-    SID = SIDbit;
+	CS = CSbit;
+	SCLK = SCLKbit;
+	SID = SIDbit;
 }
 LCD::LCD(int CSbit, int SCLKbit, int SIDbit) {
-    init(CSbit, SCLKbit, SIDbit);
+	init(CSbit, SCLKbit, SIDbit);
 }
 LCD::LCD() {
-
 }
-

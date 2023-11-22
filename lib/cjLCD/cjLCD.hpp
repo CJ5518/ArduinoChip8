@@ -13,6 +13,7 @@ public:
 
 	//Interface to commonly used functions
 	void setDisplay(bool display, bool cursor, bool blink);
+	void functionSet(bool extended, bool graphics = 1);
 
 	//Initialization
 	void init(int CSbit, int SCLKbit, int SIDbit);
