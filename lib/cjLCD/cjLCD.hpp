@@ -14,6 +14,8 @@ public:
 	//Interface to commonly used functions
 	void setDisplay(bool display, bool cursor, bool blink);
 	void functionSet(bool extended, bool graphics = 1);
+	void setGRAMAddress(byte x, byte y);
+	void writeRAM(byte data);
 
 	//Initialization
 	void init(int CSbit, int SCLKbit, int SIDbit);

@@ -49,6 +49,13 @@ void LCD::setDisplay(bool display, bool cursor, bool blink) {
 void LCD::functionSet(bool extended, bool graphics) {
 	sendByte(0, 0, 0b100000 | (extended << 2) | (graphics << 1));
 }
+void LCD::setGRAMAddress(byte x, byte y) {
+	sendByte(0, 0, 0x80 | x);
+	sendByte(0, 0, 0x80 | y);
+}
+void LCD::writeRAM(byte data) {
+	sendByte(1,0, data);
+}
 
 //Initialization
 void LCD::init(int CSbit, int SCLKbit, int SIDbit) {

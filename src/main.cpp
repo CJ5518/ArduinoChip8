@@ -31,20 +31,38 @@ void setup() {
 	lcd.setDisplay(1, 0, 0);
 	lcd.functionSet(1);
 	delay(1);
+	
 
-	for (int x = 0; x <= 0xFF; x++) {
-		for (int y = 0; y <= 0xFF; y++) {
-			lcd.sendByte(0,0,0x80 | x);
-			lcd.sendByte(0,0,0x80 | y);
-
-			for (int i = 0; i < 32; i++) {
-				lcd.sendByte(1, 0, 0b10101010);
-			}
-		}
-	}
 	
 	
 }
 
+byte cursorX = 0;
+byte cursorY = 0;
+bool goAgain = true;
+
 void loop() {
+	if (!digitalRead(8) && goAgain) {
+		cursorX++;
+		goAgain = false;
+	} else if (!digitalRead(9) && goAgain) {
+		cursorX--;
+		goAgain = false;
+	} else if (!digitalRead(10) && goAgain) {
+		cursorY++;
+		goAgain = false;
+	} else if (!digitalRead(11) && goAgain) {
+		cursorY--;
+		goAgain = false;
+	} else {
+		goAgain = true;
+	}
+
+	lcd.setGRAMAddress(cursorX, cursorY);
+	lcd.writeRAM(0xFF); lcd.writeRAM(0xFF);
+	delay(30);
+	lcd.setGRAMAddress(cursorX, cursorY);
+	lcd.writeRAM(0x00); lcd.writeRAM(0x00);
+	delay(30);
+
 }
