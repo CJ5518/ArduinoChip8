@@ -92,11 +92,9 @@ void LCD::drawBoard() {
 		//Draw one line
 		for (byte x = 0; x < 16; x++) {
 			writeRAM(boardGetByte(x,y));
-			delay(10);
 		}
 		//Draw the other line
 		for (byte x = 0; x < 16; x++) {
-			delay(1);
 			writeRAM(boardGetByte(x,y+32));
 		}
 	}
