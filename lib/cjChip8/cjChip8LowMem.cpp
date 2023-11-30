@@ -223,6 +223,7 @@ void Chip8::tick() {
 					//We treat this one as unknown opcode
 					//Because I can't be bothered to deal with it, not enough RAM
 					exceptionFlags |= UNKNOWN_OPCODE;
+					instructionsExecuted = 69;
 				} break;
 				case 0x33: { //BCD
 					if (iRegister + 2 >= MAX_MEMORY) {

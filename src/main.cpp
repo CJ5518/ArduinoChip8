@@ -55,7 +55,7 @@ void setup() {
 	lcd.clearBoard();
 	chip8.lcd = &lcd;
 	chip8.keypad = &keypad;
-	chip8.loadROM(tetris, sizeof(tetris));
+	chip8.loadROM(pong, sizeof(pong));
 }
 
 int count = 0;
