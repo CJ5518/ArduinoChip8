@@ -85,6 +85,10 @@ void loop() {
 			break;
 		}
 		chip8.tick();
+		if (chip8.delayTimer)
+			chip8.delayTimer--;
+		if (chip8.soundTimer)
+			chip8.soundTimer--;
 	}
 	lcd.drawBoard();
 }

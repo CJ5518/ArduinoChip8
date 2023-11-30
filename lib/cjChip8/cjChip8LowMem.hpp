@@ -5,8 +5,8 @@
 #include "cjLCD.hpp"
 #include "keypad.hpp"
 
-#define MAX_MEMORY 512
-#define MAX_STACK 12
+#define MAX_MEMORY 700
+#define MAX_STACK 8
 
 class Chip8 {
 public:
