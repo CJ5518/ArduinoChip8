@@ -34,6 +34,10 @@ public:
 	inline void boardWritePixel(byte x, byte y, byte thing);
 	void boardWritePixel(int id, byte thing);
 
+	//Font interface - all functions here take byte coordinates (so much easier)
+	void drawChar(byte x, byte y, char thing);
+	void drawString(byte x, byte y, char* thing);
+
 
 	//Initialization
 	void init(byte CSbit, byte SCLKbit, byte SIDbit);

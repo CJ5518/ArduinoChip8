@@ -1,5 +1,5 @@
 #include "cjLCD.hpp"
-
+#include "cjLCDFont.hpp"
 #define nop asm volatile ("nop\n\t")
 
 
@@ -106,10 +106,10 @@ inline byte LCD::boardGetByte(int id) {
 	return board[id];
 }
 inline void LCD::boardWriteByte(byte x, byte y, byte thing) {
-
+	boardWriteByte(byteCoordToIdx(x,y), thing);
 }
 void LCD::boardWriteByte(int id, byte thing) {
-
+	board[id] = thing;
 }
 inline bool LCD::boardGetPixel(byte x, byte y) {
 
@@ -122,4 +122,25 @@ inline void LCD::boardWritePixel(byte x, byte y, byte thing) {
 }
 void LCD::boardWritePixel(int id, byte thing) {
 
+}
+
+byte bytereverse(byte b) {
+  b = (b & 0x55) << 1 | (b & 0xAA) >> 1; // swap adjacent bits
+  b = (b & 0x33) << 2 | (b & 0xCC) >> 2; // swap adjacent pairs
+  b = (b & 0x0F) << 4 | (b & 0xF0) >> 4; // swap nibbles
+  return b;
+}
+
+void LCD::drawChar(byte x, byte y, char thing) {
+	for (byte yy = y; yy < y + 8; yy++) {
+		
+		boardWriteByte(x, yy, bytereverse(pgm_read_byte(font8x8_basic + ((int)thing*8) + yy)));
+	}
+}
+void LCD::drawString(byte x, byte y, char* thing) {
+	byte count = 0;
+	while (thing[count]) {
+		drawChar(x + count, y, thing[count]);
+		count++;
+	}
 }

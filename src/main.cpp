@@ -26,8 +26,10 @@ void setup() {
 	lcd.functionSet(1);
 	delay(1);
 	lcd.clearBoard();
+	lcd.drawChar(0, 0, 'A');
+	lcd.drawString(1,0,"Hello, World!");
 	lcd.drawBoard();
-	
+
 }
 
 void loop() {
