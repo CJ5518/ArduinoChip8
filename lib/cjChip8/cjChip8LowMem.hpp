@@ -29,6 +29,7 @@ public:
 	const byte NO_MEMORY = 1 << 1;
 	const byte STACK_OVERFLOW = 1 << 2;
 	const byte STACK_UNDERFLOW = 1 << 3;
+	const byte BAD_LCD_COORDS = 1 << 4;
 
 	LCD* lcd;
 	Keypad* keypad;

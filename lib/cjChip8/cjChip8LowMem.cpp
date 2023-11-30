@@ -154,14 +154,19 @@ void Chip8::tick() {
 				return;
 			}
 			for (byte col = 0; col < (opcodeLo & 0x0F); col++) {
-				byte row = memory[iRegister];
+				byte row = memory[iRegister + col];
 				for (byte q = 0; q < 8; q++) {
 					if (row & 0x80) {
 						bool oldState = lcd->boardGetPixel((registers[X] + q) * 2, (registers[Y] + col) * 2);
-						byte toWrite = 0;
+						byte toWrite = !oldState;
 						if (oldState) {
 							registers[0xF] = 1;
-							toWrite = 1;
+						}
+						if ((((registers[X] + q) * 2) + 1) > 127) {
+							exceptionFlags |= BAD_LCD_COORDS;
+						}
+						if ((((registers[Y] + col) * 2) + 1) > 63) {
+							exceptionFlags |= BAD_LCD_COORDS;
 						}
 						lcd->boardWritePixel(((registers[X] + q) * 2) + 0, ((registers[Y] + col) * 2) + 0, toWrite);
 						lcd->boardWritePixel(((registers[X] + q) * 2) + 1, ((registers[Y] + col) * 2) + 1, toWrite);

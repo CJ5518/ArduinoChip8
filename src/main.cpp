@@ -62,7 +62,7 @@ int count = 0;
 void loop() {
 	keypad.updateState();
 	
-	for (byte q = 0; q < 20; q++) {
+	for (byte q = 0; q < 200; q++) {
 		if (chip8.exceptionFlags) {
 			if (chip8.exceptionFlags & chip8.NO_MEMORY) {
 				lcd.drawString(0, 0, "NO_MEMORY");
@@ -76,13 +76,15 @@ void loop() {
 			if (chip8.exceptionFlags & chip8.UNKNOWN_OPCODE) {
 				lcd.drawString(0, 3 * 8, "UNKNOWN_OPCODE");
 			}
+			if (chip8.exceptionFlags & chip8.BAD_LCD_COORDS) {
+				lcd.drawString(0, 4 * 8, "BAD_LCD_COORDS");
+			}
 			char buff[16];
-			sprintf(buff, "%d", chip8.instructionsExecuted);
-			lcd.drawString(0, 4 * 8, buff);
+			sprintf(buff, "%d", (int)chip8.instructionsExecuted);
+			lcd.drawString(0, 5 * 8, buff);
 			break;
 		}
 		chip8.tick();
 	}
-
 	lcd.drawBoard();
 }
