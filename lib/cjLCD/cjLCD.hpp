@@ -30,9 +30,7 @@ public:
 	inline void boardWriteByte(byte x, byte y, byte thing);
 	void boardWriteByte(int id, byte thing);
 	inline bool boardGetPixel(byte x, byte y);
-	bool boardGetPixel(int id);
 	inline void boardWritePixel(byte x, byte y, byte thing);
-	void boardWritePixel(int id, byte thing);
 
 	//Font interface - all functions here take byte coordinates (so much easier)
 	void drawChar(byte x, byte y, char thing);

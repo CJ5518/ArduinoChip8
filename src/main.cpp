@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "cjLCD.hpp"
 #include "keypad.hpp"
+#include "cjChip8LowMem.hpp"
+#include "cjChip8Roms.hpp"
 
 const byte CS = 8;
 const byte SCLK = 10;
@@ -8,6 +10,7 @@ const byte SID = 9;
 
 LCD lcd;
 Keypad keypad;
+Chip8 chip8;
 
 //Get rid of this when done testing (wastes precious ram)
 char keypadCharLookup[] = {
@@ -50,6 +53,9 @@ void setup() {
 	lcd.drawString(1,0,"Hello, World!");
 	lcd.drawBoard();
 
+	chip8.lcd = &lcd;
+	chip8.keypad = &keypad;
+	chip8.loadROM(tetris, sizeof(tetris));
 }
 
 int count = 0;

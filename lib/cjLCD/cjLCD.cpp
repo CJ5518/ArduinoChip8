@@ -77,11 +77,11 @@ inline void LCD::byteIdxToCoord(int idx, byte* x, byte* y) {
 	*y = (idx - *x) / 16;
 }
 inline int LCD::pixelCoordToIdx(byte x, byte y) {
-	return x + (y * 128);
+	return byteCoordToIdx(x / 8, y);
 }
 inline void LCD::pixelIdxToCoord(int idx, byte* x, byte* y) {
-	*x = idx % 128;
-	*y = (idx - *x) / 128;
+	byteIdxToCoord(idx, x, y);
+	*x *= 8;
 }
 void LCD::clearBoard() {
 	memset(board, 0, sizeof(board));
@@ -112,16 +112,10 @@ void LCD::boardWriteByte(int id, byte thing) {
 	board[id] = thing;
 }
 inline bool LCD::boardGetPixel(byte x, byte y) {
-
-}
-bool LCD::boardGetPixel(int id) {
-
+	bitRead(board[pixelCoordToIdx(x,y)], x % 8);
 }
 inline void LCD::boardWritePixel(byte x, byte y, byte thing) {
-
-}
-void LCD::boardWritePixel(int id, byte thing) {
-
+	bitWrite(board[pixelCoordToIdx(x,y)], x % 8, thing);
 }
 
 byte bytereverse(byte b) {
@@ -134,7 +128,7 @@ byte bytereverse(byte b) {
 void LCD::drawChar(byte x, byte y, char thing) {
 	for (byte yy = y; yy < y + 8; yy++) {
 		
-		boardWriteByte(x, yy, bytereverse(pgm_read_byte(font8x8_basic + ((int)thing*8) + yy)));
+		boardWriteByte(x, yy, bytereverse(pgm_read_byte(font8x8_basic + ((int)thing*8) + (yy-y))));
 	}
 }
 void LCD::drawString(byte x, byte y, char* thing) {
