@@ -20,6 +20,7 @@ public:
 	byte registers[16];
 	byte soundTimer;
 	byte delayTimer;
+	unsigned long instructionsExecuted;
 
 	//Flags in case of problems, will be non-zero if anything went wrong
 	byte exceptionFlags;

@@ -52,7 +52,7 @@ void setup() {
 	lcd.drawChar(0, 0, 'A');
 	lcd.drawString(1,0,"Hello, World!");
 	lcd.drawBoard();
-
+	lcd.clearBoard();
 	chip8.lcd = &lcd;
 	chip8.keypad = &keypad;
 	chip8.loadROM(tetris, sizeof(tetris));
@@ -61,12 +61,28 @@ void setup() {
 int count = 0;
 void loop() {
 	keypad.updateState();
-	for (byte q = 0; q < 16; q++) {
-		if (keypad.keypad[q]) {
-			lcd.drawChar(count, 0, keypadCharLookup[q]);
-			count++;
-			if (count == 16) count = 0;
+	
+	for (byte q = 0; q < 20; q++) {
+		if (chip8.exceptionFlags) {
+			if (chip8.exceptionFlags & chip8.NO_MEMORY) {
+				lcd.drawString(0, 0, "NO_MEMORY");
+			}
+			if (chip8.exceptionFlags & chip8.STACK_OVERFLOW) {
+				lcd.drawString(0, 1 * 8, "STACK_OVERFLOW");
+			}
+			if (chip8.exceptionFlags & chip8.STACK_UNDERFLOW) {
+				lcd.drawString(0, 2 * 8, "STACK_UNDERFLOW");
+			}
+			if (chip8.exceptionFlags & chip8.UNKNOWN_OPCODE) {
+				lcd.drawString(0, 3 * 8, "UNKNOWN_OPCODE");
+			}
+			char buff[16];
+			sprintf(buff, "%d", chip8.instructionsExecuted);
+			lcd.drawString(0, 4 * 8, buff);
+			break;
 		}
+		chip8.tick();
 	}
+
 	lcd.drawBoard();
 }

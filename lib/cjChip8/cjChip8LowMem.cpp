@@ -12,6 +12,7 @@ void Chip8::loadROM(const byte* data, int length) {
 	programCounter = 0;
 	stackPointer = 0;
 	exceptionFlags = 0;
+	instructionsExecuted = 0;
 }
 void Chip8::tick() {
 	if (programCounter >= MAX_MEMORY) {
@@ -54,6 +55,7 @@ void Chip8::tick() {
 		case 0x20: { //Call subroutine
 			if (stackPointer < MAX_STACK) {
 				stack[stackPointer] = programCounter;
+				stackPointer++;
 				programCounter = NNN - 0x200; //Always sub 0x200 because our mem starts at 0
 			} else {
 				exceptionFlags |= STACK_OVERFLOW;
@@ -255,5 +257,6 @@ void Chip8::tick() {
 			}
 		} break;
 	}
+	instructionsExecuted++;
 }
 

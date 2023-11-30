@@ -111,10 +111,10 @@ inline void LCD::boardWriteByte(byte x, byte y, byte thing) {
 void LCD::boardWriteByte(int id, byte thing) {
 	board[id] = thing;
 }
-inline bool LCD::boardGetPixel(byte x, byte y) {
-	bitRead(board[pixelCoordToIdx(x,y)], x % 8);
+bool LCD::boardGetPixel(byte x, byte y) {
+	return bitRead(board[pixelCoordToIdx(x,y)], x % 8);
 }
-inline void LCD::boardWritePixel(byte x, byte y, byte thing) {
+void LCD::boardWritePixel(byte x, byte y, byte thing) {
 	bitWrite(board[pixelCoordToIdx(x,y)], x % 8, thing);
 }
 
