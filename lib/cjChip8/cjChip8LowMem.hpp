@@ -7,6 +7,8 @@
 
 #define MAX_MEMORY 1500
 #define MAX_STACK 8
+#define PGM_OFFSET 0x200
+#define PGM_OFFSET_POSITIVE (0x200-PGM_OFFSET)
 
 class Chip8 {
 public:
@@ -17,6 +19,7 @@ public:
 	byte stackPointer;
 	uint16_t programCounter;
 	uint16_t iRegister;
+	bool iPointsToFontData;
 	byte registers[16];
 	byte soundTimer;
 	byte delayTimer;

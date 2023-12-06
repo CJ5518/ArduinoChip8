@@ -1,22 +1,42 @@
 #include <Arduino.h>
 #include "cjChip8LowMem.hpp"
 
+
+const PROGMEM byte chip8Font[] = {
+0xf0, 0x90, 0x90, 0x90, 0xf0, // 0
+0x20, 0x60, 0x20, 0x20, 0x70, // 1
+0xf0, 0x10, 0xf0, 0x80, 0xf0, // 2
+0xf0, 0x10, 0xf0, 0x10, 0xf0, // 3
+0x90, 0x90, 0xf0, 0x10, 0x10, // 4
+0xf0, 0x80, 0xf0, 0x10, 0xf0, // 5
+0xf0, 0x80, 0xf0, 0x90, 0xf0, // 6
+0xf0, 0x10, 0x20, 0x40, 0x40, // 7
+0xf0, 0x90, 0xf0, 0x90, 0xf0, // 8
+0xf0, 0x90, 0xf0, 0x10, 0xf0, // 9
+0xf0, 0x90, 0xf0, 0x90, 0x90, // A
+0xe0, 0x90, 0xe0, 0x90, 0xe0, // B
+0xf0, 0x80, 0x80, 0x80, 0xf0, // C
+0xe0, 0x90, 0x90, 0x90, 0xe0, // D
+0xf0, 0x80, 0xf0, 0x80, 0xf0, // E
+0xf0, 0x80, 0xf0, 0x80, 0x80};// F
+
 void Chip8::loadROM(const byte* data, int length) {
-	if (length >= MAX_MEMORY) {
+	if (length + PGM_OFFSET_POSITIVE >= MAX_MEMORY) {
 		exceptionFlags |= NO_MEMORY;
 		exceptionInfo = 1;
 		exceptionInfo2 = length;
 		return;
 	}
 	for (int q = 0; q < length; q++) {
-		memory[q] = pgm_read_byte(data + q);
+		memory[q+PGM_OFFSET_POSITIVE] = pgm_read_byte(data + q);
 	}
-	programCounter = 0;
+	programCounter = PGM_OFFSET_POSITIVE;
 	stackPointer = 0;
 	exceptionFlags = 0;
 	instructionsExecuted = 0;
 	exceptionInfo = 0;
 	exceptionInfo2 = 0;
+	iPointsToFontData = false;
 }
 void Chip8::tick() {
 	if (programCounter >= MAX_MEMORY) {
@@ -56,13 +76,13 @@ void Chip8::tick() {
 			}
 		} break;
 		case 0x10: { //Goto
-			programCounter = NNN - 0x200; //Always sub 0x200 because our mem starts at 0
+			programCounter = NNN - PGM_OFFSET; //Always sub PGM_OFFSET because our mem starts at 0
 		} break;
 		case 0x20: { //Call subroutine
 			if (stackPointer < MAX_STACK) {
 				stack[stackPointer] = programCounter;
 				stackPointer++;
-				programCounter = NNN - 0x200; //Always sub 0x200 because our mem starts at 0
+				programCounter = NNN - PGM_OFFSET; //Always sub PGM_OFFSET because our mem starts at 0
 			} else {
 				exceptionFlags |= STACK_OVERFLOW;
 			}
@@ -146,10 +166,11 @@ void Chip8::tick() {
 			}
 		} break;
 		case 0xA0: {
-			iRegister = NNN - 0x200; //Always sub the 0x200
+			iRegister = NNN - PGM_OFFSET; //Always sub the PGM_OFFSET
+			iPointsToFontData = false;
 		} break;
 		case 0xB0: { //Jumps to the address NNN plus V0
-			programCounter = registers[0] + (NNN - 0x200);
+			programCounter = registers[0] + (NNN - PGM_OFFSET);
 		} break;
 		case 0xC0: { //Random numbers
 			registers[X] = NN & (rand() % 256);
@@ -161,8 +182,14 @@ void Chip8::tick() {
 				exceptionInfo2 = iRegister;
 				return;
 			}
+
 			for (byte col = 0; col < (opcodeLo & 0x0F); col++) {
-				byte row = memory[iRegister + col];
+				byte row;
+				if (iPointsToFontData) {
+					row = pgm_read_byte(chip8Font + (iRegister * 5) + col);
+				} else {
+					row = memory[iRegister + col];
+				}
 				for (byte q = 0; q < 8; q++) {
 					if (row & 0x80) {
 						byte reqX = (registers[X] + q) % 64;
@@ -178,6 +205,7 @@ void Chip8::tick() {
 					row <<= 1;
 				}
 			}
+			iPointsToFontData = false;
 		} break;
 		case 0xE0: { //User input
 			switch (opcodeLo) {
@@ -222,10 +250,10 @@ void Chip8::tick() {
 					iRegister += registers[X];
 				} break;
 				case 0x29: { //Sets I to the location of the sprite for the character in VX
-					//We treat this one as unknown opcode
-					//Because I can't be bothered to deal with it, not enough RAM
-					exceptionFlags |= UNKNOWN_OPCODE;
-					exceptionInfo = 69;
+					//We treat this one in a silly manner
+					//Set a flag that I points to a character
+					iPointsToFontData = true;
+					iRegister = registers[X];
 				} break;
 				case 0x33: { //BCD
 					if (iRegister + 2 >= MAX_MEMORY) {
@@ -262,7 +290,7 @@ void Chip8::tick() {
 						return;
 					}
 					for (byte q = 0; q <= X; q++) {
-						registers[q] = registers[iRegister + q];
+						registers[q] = memory[iRegister + q];
 					}
 				} break;
 				default: {
