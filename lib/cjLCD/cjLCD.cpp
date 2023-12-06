@@ -155,11 +155,12 @@ void LCD::drawChars(byte x, byte y, char thing, char thing2) {
 		writeRAM(bytereverse(pgm_read_byte(font8x8_basic + ((int)thing2*8) + (yy-y))));
 	}
 }
-void LCD::drawString(byte x, byte y, char* thing) {
+int LCD::drawString(byte x, byte y, char* thing) {
 	byte count = 0;
 	while (thing[count]) {
 		drawChars(x + (count/2), y, thing[count], thing[count+1]);
 		count+=2;
-		if (thing[count-1] == 0) break;
+		if (thing[count-1] == 0) return count-1;
 	}
+	return count;
 }

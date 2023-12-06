@@ -12,6 +12,32 @@ LCD lcd;
 Keypad keypad;
 Chip8 chip8;
 
+struct menuEntry {
+	const char* name;
+	const byte* location;
+	int size;
+};
+
+#define ITEM(n,l) {n,l,sizeof(l)}
+
+menuEntry menu[] {
+	ITEM("test1",test_1),
+	ITEM("test2",test_2),
+	ITEM("test3",test_3),
+	ITEM("maze",maze),
+	ITEM("minimal", minimalGame),
+	ITEM("snake",snake),
+	ITEM("logo1",chip8Picture),
+	ITEM("pong",pong),
+	ITEM("brick",brickBrixHack),
+	ITEM("missile",missile),
+	ITEM("tetris",tetris),
+	ITEM("tron",tron),
+	ITEM("submarine",submarine),
+};
+byte menuTop = 0;
+byte cursorItem = 0;
+
 void setup() {
 	delay(255);
 
@@ -43,18 +69,56 @@ void setup() {
 	delayMicroseconds(72);
 	lcd.functionSet(1);
 	delay(1);
-	lcd.drawString(1,0,"SuhDude");
-	lcd.board[16] = 0xAA;
-	lcd.drawBoard();
 	lcd.clearBoard();
+	lcd.drawBoard();
 	chip8.lcd = &lcd;
 	chip8.keypad = &keypad;
-	chip8.loadROM(pong, sizeof(pong));
 }
 
 int count = 0;
+bool wait = true;
 void loop() {
+	
+	
+	while (wait) {
+		//Menu part
+		byte menuLength = sizeof(menu) / sizeof(menuEntry);
+		if (menuTop > cursorItem) {
+			menuTop = cursorItem;
+		}
+		if (menuTop < cursorItem-7 && menuLength -(cursorItem-7) >= 8) {
+			menuTop = cursorItem-7;
+		}
 
+		//Draw where we are
+		for (byte q = 0; q < 8; q++) {
+			lcd.drawString(2, q * 8, (char*)menu[menuTop+q].name);
+			
+			lcd.drawChars(0, q * 8, 0, 0);
+		}
+		
+		lcd.drawChars(0, (cursorItem-menuTop) * 8, '!', 0);
+
+		while (true) {
+			keypad.updateState();
+			if (keypad.keypad[2] && cursorItem > 0) {
+				cursorItem--;
+				break;
+			}
+			if (keypad.keypad[8] && cursorItem+1 < menuLength) {
+				cursorItem++;
+				break;
+			}
+			if (keypad.keypad[0xF]) {
+				chip8.loadROM(menu[cursorItem].location, menu[cursorItem].size);
+				wait = false;
+				break;
+			}
+		}
+	}
+
+	//Chip8 part
+	srand(micros());
 	keypad.updateState();
 	
 	for (byte q = 0; q < 20; q++) {

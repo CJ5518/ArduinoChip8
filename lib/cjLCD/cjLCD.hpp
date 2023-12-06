@@ -36,7 +36,7 @@ public:
 
 	//Font interface - all functions here take byte coordinates (so much easier)
 	void drawChars(byte x, byte y, char thing, char thing2);
-	void drawString(byte x, byte y, char* thing);
+	int drawString(byte x, byte y, char* thing);
 
 
 	//Initialization

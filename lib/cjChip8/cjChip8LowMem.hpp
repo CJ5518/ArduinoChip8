@@ -5,7 +5,7 @@
 #include "cjLCD.hpp"
 #include "keypad.hpp"
 
-#define MAX_MEMORY 1500
+#define MAX_MEMORY 1300
 #define MAX_STACK 8
 #define PGM_OFFSET 0x200
 #define PGM_OFFSET_POSITIVE (0x200-PGM_OFFSET)
