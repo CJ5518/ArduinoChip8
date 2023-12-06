@@ -56,6 +56,21 @@ void LCD::setGRAMAddress(byte x, byte y) {
 void LCD::writeRAM(byte data) {
 	sendByte(1,0, data);
 }
+void LCD::writeRAMDoubledBits(byte data) {
+	byte byte1, byte2;
+	byte1 = 0;
+	byte2 = 0;
+	for (byte q = 0; q < 4; q++) {
+		byte1 |= (bitRead(data, q) << (q*2));
+		byte1 |= (bitRead(data, q) << ((q*2)+1));
+	}
+	for (byte q = 4; q < 8; q++) {
+		byte2 |= (bitRead(data, q) << ((q-4)*2));
+		byte2 |= (bitRead(data, q) << (((q-4)*2)+1));
+	}
+	writeRAM(byte2);
+	writeRAM(byte1);
+}
 
 //Initialization
 void LCD::init(byte CSbit, byte SCLKbit, byte SIDbit) {
@@ -70,11 +85,11 @@ LCD::LCD() {
 }
 
 inline int LCD::byteCoordToIdx(byte x, byte y) {
-	return x + (y * 16);
+	return x + (y * 8);
 }
 inline void LCD::byteIdxToCoord(int idx, byte* x, byte* y) {
-	*x = idx % 16;
-	*y = (idx - *x) / 16;
+	*x = idx % 8;
+	*y = (idx - *x) / 8;
 }
 inline int LCD::pixelCoordToIdx(byte x, byte y) {
 	return byteCoordToIdx(x / 8, y);
@@ -88,14 +103,17 @@ void LCD::clearBoard() {
 }
 void LCD::drawBoard() {
 	for (byte y = 0; y < 32; y++) {
-		setGRAMAddress(0, y);
-		//Draw one line
-		for (byte x = 0; x < 16; x++) {
-			writeRAM(boardGetByte(x,y));
-		}
-		//Draw the other line
-		for (byte x = 0; x < 16; x++) {
-			writeRAM(boardGetByte(x,y+32));
+		//Do it twice
+		for (byte q = 0; q < 2; q++) {
+			setGRAMAddress(0, y+q);
+			//Draw one line
+			for (byte x = 0; x < 8; x++) {
+				writeRAMDoubledBits(boardGetByte(x,y/2));
+			}
+			//Draw the other line
+			for (byte x = 0; x < 8; x++) {
+				writeRAMDoubledBits(boardGetByte(x,(y/2)+16));
+			}
 		}
 	}
 }
@@ -125,16 +143,23 @@ byte bytereverse(byte b) {
   return b;
 }
 
-void LCD::drawChar(byte x, byte y, char thing) {
+void LCD::drawChars(byte x, byte y, char thing, char thing2) {
+	if (thing2 == 0) thing2 = ' ';
+	if (y >= 32) {
+		y -= 32;
+		x += 8;
+	}
 	for (byte yy = y; yy < y + 8; yy++) {
-		
-		boardWriteByte(x, yy, bytereverse(pgm_read_byte(font8x8_basic + ((int)thing*8) + (yy-y))));
+		setGRAMAddress(x, yy);
+		writeRAM(bytereverse(pgm_read_byte(font8x8_basic + ((int)thing*8) + (yy-y))));
+		writeRAM(bytereverse(pgm_read_byte(font8x8_basic + ((int)thing2*8) + (yy-y))));
 	}
 }
 void LCD::drawString(byte x, byte y, char* thing) {
 	byte count = 0;
 	while (thing[count]) {
-		drawChar(x + count, y, thing[count]);
-		count++;
+		drawChars(x + (count/2), y, thing[count], thing[count+1]);
+		count+=2;
+		if (thing[count-1] == 0) break;
 	}
 }

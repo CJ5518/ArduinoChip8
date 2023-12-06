@@ -5,7 +5,7 @@
 #include "cjLCD.hpp"
 #include "keypad.hpp"
 
-#define MAX_MEMORY 700
+#define MAX_MEMORY 1500
 #define MAX_STACK 8
 
 class Chip8 {
@@ -21,6 +21,9 @@ public:
 	byte soundTimer;
 	byte delayTimer;
 	unsigned long instructionsExecuted;
+	//A number that means different things depending on the exception
+	unsigned long exceptionInfo;
+	unsigned long exceptionInfo2;
 
 	//Flags in case of problems, will be non-zero if anything went wrong
 	byte exceptionFlags;

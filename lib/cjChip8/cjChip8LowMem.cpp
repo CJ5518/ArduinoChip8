@@ -4,6 +4,8 @@
 void Chip8::loadROM(const byte* data, int length) {
 	if (length >= MAX_MEMORY) {
 		exceptionFlags |= NO_MEMORY;
+		exceptionInfo = 1;
+		exceptionInfo2 = length;
 		return;
 	}
 	for (int q = 0; q < length; q++) {
@@ -13,10 +15,14 @@ void Chip8::loadROM(const byte* data, int length) {
 	stackPointer = 0;
 	exceptionFlags = 0;
 	instructionsExecuted = 0;
+	exceptionInfo = 0;
+	exceptionInfo2 = 0;
 }
 void Chip8::tick() {
 	if (programCounter >= MAX_MEMORY) {
 		exceptionFlags |= NO_MEMORY;
+		exceptionInfo = 2;
+		exceptionInfo2 = programCounter;
 		return;
 	}
 	byte opcodeHi = memory[programCounter];
@@ -151,6 +157,8 @@ void Chip8::tick() {
 		case 0xD0: { //Draw a sprite
 			if ((iRegister + (opcodeLo & 0x0F)) >= MAX_MEMORY) {
 				exceptionFlags |= NO_MEMORY;
+				exceptionInfo = 3;
+				exceptionInfo2 = iRegister;
 				return;
 			}
 			for (byte col = 0; col < (opcodeLo & 0x0F); col++) {
@@ -159,16 +167,13 @@ void Chip8::tick() {
 					if (row & 0x80) {
 						byte reqX = (registers[X] + q) % 64;
 						byte reqY = (registers[Y] + col) % 32;
-						bool oldState = lcd->boardGetPixel(reqX * 2, reqY * 2);
+						bool oldState = lcd->boardGetPixel(reqX, reqY);
 						byte toWrite = !oldState;
 						if (oldState) {
 							registers[0xF] = 1;
 						}
 						
-						lcd->boardWritePixel((reqX * 2) + 0, (reqY * 2) + 0, toWrite);
-						lcd->boardWritePixel((reqX * 2) + 1, (reqY * 2) + 1, toWrite);
-						lcd->boardWritePixel((reqX * 2) + 1, (reqY * 2) + 0, toWrite);
-						lcd->boardWritePixel((reqX * 2) + 0, (reqY * 2) + 1, toWrite);
+						lcd->boardWritePixel(reqX, reqY, toWrite);
 					}
 					row <<= 1;
 				}
@@ -220,11 +225,13 @@ void Chip8::tick() {
 					//We treat this one as unknown opcode
 					//Because I can't be bothered to deal with it, not enough RAM
 					exceptionFlags |= UNKNOWN_OPCODE;
-					instructionsExecuted = 69;
+					exceptionInfo = 69;
 				} break;
 				case 0x33: { //BCD
 					if (iRegister + 2 >= MAX_MEMORY) {
 						exceptionFlags |= NO_MEMORY;
+						exceptionInfo = 4;
+						exceptionInfo2 = iRegister;
 						return;
 					}
 					byte value = registers[X];
@@ -239,6 +246,8 @@ void Chip8::tick() {
 				case 0x55: { //Stores from V0 to VX (including VX) in memory, starting at address I
 					if (iRegister + X >= MAX_MEMORY) {
 						exceptionFlags |= NO_MEMORY;
+						exceptionInfo = 5;
+						exceptionInfo2 = iRegister;
 						return;
 					}
 					for (byte q = 0; q <= X; q++) {
@@ -248,6 +257,8 @@ void Chip8::tick() {
 				case 0x65: { //Fills from V0 to VX (including VX) with values from memory, starting at address I
 					if (iRegister + X >= MAX_MEMORY) { 
 						exceptionFlags |= NO_MEMORY;
+						exceptionInfo = 6;
+						exceptionInfo2 = iRegister;
 						return;
 					}
 					for (byte q = 0; q <= X; q++) {

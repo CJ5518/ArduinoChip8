@@ -43,18 +43,18 @@ void setup() {
 	delayMicroseconds(72);
 	lcd.functionSet(1);
 	delay(1);
-	lcd.clearBoard();
-	lcd.drawChar(0, 0, 'A');
-	lcd.drawString(1,0,"Hello, World!");
+	lcd.drawString(1,0,"SuhDude");
+	lcd.board[16] = 0xAA;
 	lcd.drawBoard();
 	lcd.clearBoard();
 	chip8.lcd = &lcd;
 	chip8.keypad = &keypad;
-	chip8.loadROM(minimalGame, sizeof(minimalGame));
+	chip8.loadROM(tetris, sizeof(tetris));
 }
 
 int count = 0;
 void loop() {
+
 	keypad.updateState();
 	
 	for (byte q = 0; q < 20; q++) {
@@ -75,9 +75,19 @@ void loop() {
 				lcd.drawString(0, 4 * 8, "BAD_LCD_COORDS");
 			}
 			char buff[16];
+
 			sprintf(buff, "%d", (int)chip8.instructionsExecuted);
 			lcd.drawString(0, 5 * 8, buff);
-			break;
+
+			sprintf(buff, "%d", (int)chip8.exceptionInfo);
+			lcd.drawString(0, 6 * 8, buff);
+			//Doesn't work for some reason I cannot begin to understand
+			//Will work if the above sprintf isn't there
+			sprintf(buff, "%d", (int)chip8.exceptionInfo2);
+			lcd.drawString(0, 7 * 8, buff);
+
+
+			while (true) {}
 		}
 		chip8.tick();
 		if (chip8.delayTimer)

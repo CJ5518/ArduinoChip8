@@ -16,9 +16,11 @@ public:
 	void functionSet(bool extended, bool graphics = 1);
 	void setGRAMAddress(byte x, byte y);
 	void writeRAM(byte data);
+	//Writes two bytes from just the 1
+	void writeRAMDoubledBits(byte data);
 
 	//High level 'board' interface
-	byte board[1024];
+	byte board[256];
 	inline int byteCoordToIdx(byte x, byte y);
 	inline void byteIdxToCoord(int idx, byte* x, byte* y);
 	inline int pixelCoordToIdx(byte x, byte y);
@@ -33,7 +35,7 @@ public:
 	void boardWritePixel(byte x, byte y, byte thing);
 
 	//Font interface - all functions here take byte coordinates (so much easier)
-	void drawChar(byte x, byte y, char thing);
+	void drawChars(byte x, byte y, char thing, char thing2);
 	void drawString(byte x, byte y, char* thing);
 
 
