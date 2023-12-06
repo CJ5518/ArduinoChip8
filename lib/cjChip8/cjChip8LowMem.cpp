@@ -157,21 +157,18 @@ void Chip8::tick() {
 				byte row = memory[iRegister + col];
 				for (byte q = 0; q < 8; q++) {
 					if (row & 0x80) {
-						bool oldState = lcd->boardGetPixel((registers[X] + q) * 2, (registers[Y] + col) * 2);
+						byte reqX = (registers[X] + q) % 64;
+						byte reqY = (registers[Y] + col) % 32;
+						bool oldState = lcd->boardGetPixel(reqX * 2, reqY * 2);
 						byte toWrite = !oldState;
 						if (oldState) {
 							registers[0xF] = 1;
 						}
-						if ((((registers[X] + q) * 2) + 1) > 127) {
-							exceptionFlags |= BAD_LCD_COORDS;
-						}
-						if ((((registers[Y] + col) * 2) + 1) > 63) {
-							exceptionFlags |= BAD_LCD_COORDS;
-						}
-						lcd->boardWritePixel(((registers[X] + q) * 2) + 0, ((registers[Y] + col) * 2) + 0, toWrite);
-						lcd->boardWritePixel(((registers[X] + q) * 2) + 1, ((registers[Y] + col) * 2) + 1, toWrite);
-						lcd->boardWritePixel(((registers[X] + q) * 2) + 1, ((registers[Y] + col) * 2) + 0, toWrite);
-						lcd->boardWritePixel(((registers[X] + q) * 2) + 0, ((registers[Y] + col) * 2) + 1, toWrite);
+						
+						lcd->boardWritePixel((reqX * 2) + 0, (reqY * 2) + 0, toWrite);
+						lcd->boardWritePixel((reqX * 2) + 1, (reqY * 2) + 1, toWrite);
+						lcd->boardWritePixel((reqX * 2) + 1, (reqY * 2) + 0, toWrite);
+						lcd->boardWritePixel((reqX * 2) + 0, (reqY * 2) + 1, toWrite);
 					}
 					row <<= 1;
 				}

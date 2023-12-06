@@ -50,14 +50,14 @@ void setup() {
 	lcd.clearBoard();
 	chip8.lcd = &lcd;
 	chip8.keypad = &keypad;
-	chip8.loadROM(snake, sizeof(snake));
+	chip8.loadROM(minimalGame, sizeof(minimalGame));
 }
 
 int count = 0;
 void loop() {
 	keypad.updateState();
 	
-	for (byte q = 0; q < 200; q++) {
+	for (byte q = 0; q < 20; q++) {
 		if (chip8.exceptionFlags) {
 			if (chip8.exceptionFlags & chip8.NO_MEMORY) {
 				lcd.drawString(0, 0, "NO_MEMORY");
